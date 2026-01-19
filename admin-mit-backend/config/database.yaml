@@ -1,10 +1,10 @@
 database:
   postgresql:
-    host: "172.30.3.135"
+    host: ""
     port: 5432
     database: "mitong_devops"
     username: "postgres"
-    password: "postgres@#123"
+    password: ""
     pool_size: 10
     max_overflow: 20
     pool_timeout: 30
@@ -13,10 +13,10 @@ database:
   
   # 测试数据库配置
   test_postgresql:
-    host: "172.30.3.135"
+    host: ""
     port: 5432
     database: "mitong_devops_test"
     username: "postgres"
-    password: "postgres@#123"
+    password: ""
     pool_size: 5
     max_overflow: 10
