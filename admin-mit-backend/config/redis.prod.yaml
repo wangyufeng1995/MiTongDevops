@@ -3,9 +3,9 @@
 
 redis:
   # 主 Redis 配置
-  host: "${REDIS_HOST:-172.30.3.135}"
-  port: ${REDIS_PORT:-6379}
-  password: "${REDIS_PASSWORD:-}"      # 生产环境强烈建议设置密码
+  host: "${REDIS_HOST:}"
+  port: ${REDIS_PORT:}
+  password: "${REDIS_PASSWORD:}"      # 生产环境强烈建议设置密码
   db: 0
   decode_responses: true
   socket_timeout: 5
