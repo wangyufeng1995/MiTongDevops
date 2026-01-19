@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 # 🚀 MiTong 运维管理平台
 
@@ -313,11 +313,12 @@ npm run dev
 cd admin-mit-backend
 
 # 启动 Worker
-celery -A celery_worker.celery worker --loglevel=info
+celery -A celery_worker.celery worker -Q celery,network_probes,alerts,ansible,host_probes --loglevel=info --pool=threads --concurrency=4
 
 # 启动 Beat（定时任务）
 celery -A celery_worker.celery beat --loglevel=info
-```
+
+celery -A celery_worker:celery beat --loglevel=error
 
 ### 🌐 访问应用
 
