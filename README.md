@@ -9,7 +9,7 @@
 [![Flask](https://img.shields.io/badge/flask-3-black.svg)](https://flask.palletsprojects.com/)
 [![Docker](https://img.shields.io/badge/docker-ready-brightgreen.svg)](https://www.docker.com/)
 
-**一个基于 React + Flask 的现代化运维管理平台**
+**一个基于 React + Flask AI大模型开发的现代化运维管理平台**
 
 支持多租户架构 | 完整权限管理 | 主机运维 | 监控告警 | 网络探测
 
@@ -568,8 +568,8 @@ docker system prune -a
 
 ## 👥 团队
 
-- **项目负责人**: [Your Name]
-- **技术负责人**: [Tech Lead Name]
+- **项目负责人**: [YufengWang]
+- **技术负责人**: [Mizi]
 - **贡献者**: 查看 [Contributors](https://github.com/your-repo/graphs/contributors)
 
 ## 🙏 致谢
