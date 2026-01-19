@@ -584,11 +584,6 @@ docker system prune -a
 - [xterm.js](https://xtermjs.org/)
 - [DiceBear](https://dicebear.com/)
 
-## 📞 联系我们
-
-- **Email**: wangyufeng@yunlizhihui.com
-- **Issue**: [GitHub Issues](https://github.com/your-repo/issues)
-- **文档**: [在线文档](https://docs.example.com)
 
 ## 🗺️ 路线图
 
@@ -625,7 +620,7 @@ docker system prune -a
 
 | 联系方式 | 链接 |
 |---------|------|
-| 📧 Email | support@mitong.com |
+- **Email**: wangyufeng@yunlizhihui.com
 | 🐛 Issues | [GitHub Issues](https://github.com/wangyufeng1995/MiTongDevopsBackend/issues) |
 | 📖 文档 | [项目文档](https://github.com/wangyufeng1995/MiTongDevopsBackend) |
 
