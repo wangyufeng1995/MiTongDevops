@@ -1,8 +1,8 @@
 redis:
-  host: "172.30.3.135"
+  host: ""
   port: 6379
-  password: "Yunli@redis5"  # Redis 密码，如果没有则留空
-  db: 2  # 默认数据库
+  password: ""  # Redis 密码，如果没有则留空
+  db: 0  # 默认数据库
   decode_responses: true
   socket_timeout: 5
   socket_connect_timeout: 5
@@ -22,7 +22,7 @@ redis:
   
   # 测试 Redis 配置
   test:
-    host: "172.30.3.135"
+    host: ""
     port: 6379
     db: 1  # 使用不同的数据库进行测试
-    password: "Yunli@redis5"
+    password: ""
