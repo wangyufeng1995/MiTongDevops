@@ -1,12 +1,23 @@
-# MiTong运维平台
+﻿<div align="center">
+
+# 🚀 MiTong 运维管理平台
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![Node](https://img.shields.io/badge/node-18+-green.svg)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/react-18-blue.svg)](https://reactjs.org/)
 [![Flask](https://img.shields.io/badge/flask-3-black.svg)](https://flask.palletsprojects.com/)
+[![Docker](https://img.shields.io/badge/docker-ready-brightgreen.svg)](https://www.docker.com/)
 
-一个基于 React + Flask 的现代化运维管理平台，支持多租户架构，提供完整的用户权限管理、主机运维管理、监控告警、网络探测等功能。
+**一个基于 React + Flask 的现代化运维管理平台**
+
+支持多租户架构 | 完整权限管理 | 主机运维 | 监控告警 | 网络探测
+
+[快速开始](#-快速开始) • [功能特性](#-核心特性) • [在线文档](#-文档) • [部署指南](#-部署)
+
+</div>
+
+---
 
 ## ✨ 核心特性
 
@@ -185,31 +196,43 @@ git commit -m "refactor(user): 重构用户服务层代码"
 
 ## 🚀 快速开始
 
-### 环境要求
+### 📋 环境要求
 
-- Node.js 18.0.0+
-- Python 3.9.0+
-- PostgreSQL 12.0+
-- Redis 6.0+
-- Git 2.30.0+
+| 软件 | 版本要求 |
+|------|---------|
+| Node.js | 18.0.0+ |
+| Python | 3.9.0+ |
+| PostgreSQL | 12.0+ |
+| Redis | 6.0+ |
+| Docker | 20.10+ (可选) |
+| Git | 2.30.0+ |
 
-### 一键安装（推荐）
+### ⚡ 一键安装（推荐）
 
 使用 Docker Compose 快速启动：
 
 ```bash
-# 克隆项目
-git clone <repository-url>
-cd mitong-admin
+# 1. 克隆项目
+git clone https://github.com/wangyufeng1995/MiTongDevopsBackend.git
+cd MiTongDevopsBackend
 
-# 启动所有服务
+# 2. 配置环境变量
+cp .env.example .env
+# 编辑 .env 文件，修改数据库密码等配置
+
+# 3. 启动所有服务
 docker-compose up -d
 
-# 访问应用
-# 前端: http://localhost:3000
+# 4. 查看服务状态
+docker-compose ps
+
+# 5. 访问应用
+# 前端: http://localhost:80
 # 后端: http://localhost:5000
 # 默认账号: admin / admin123
 ```
+
+> 💡 **提示**: 详细的 Docker 部署说明请查看 [Docker 部署指南](DOCKER_COMPOSE_部署指南.md)
 
 ### 手动安装
 
@@ -296,46 +319,64 @@ celery -A celery_worker.celery worker --loglevel=info
 celery -A celery_worker.celery beat --loglevel=info
 ```
 
-### 访问应用
+### 🌐 访问应用
 
-- 前端地址: http://localhost:3000
-- 后端地址: http://localhost:5000
-- API 文档: http://localhost:5000/api/docs
+| 服务 | 地址 | 说明 |
+|------|------|------|
+| 前端界面 | http://localhost:80 | React 前端应用 |
+| 后端 API | http://localhost:5000 | Flask API 服务 |
+| API 文档 | http://localhost:5000/api/docs | Swagger 文档 |
+| 健康检查 | http://localhost:5000/api/health | 服务健康状态 |
 
-**默认账号**:
+**🔑 默认账号**:
 - 用户名: `admin`
 - 密码: `admin123`
 
+> ⚠️ **安全提示**: 首次登录后请立即修改默认密码！
+
 ## 📚 文档
 
-### 开发文档
-- [开发指南](docs/DEVELOPMENT_GUIDE.md) - 详细的开发环境搭建和开发指南
-- [架构设计](docs/ARCHITECTURE.md) - 系统架构和技术选型说明
-- [数据库设计](docs/DATABASE_DESIGN.md) - 数据库表结构和设计说明
-- [代码规范](docs/CODE_STANDARDS.md) - 代码规范和贡献指南
-- [常见问题](docs/FAQ.md) - 常见问题解答
+<table>
+<tr>
+<td width="50%">
 
-### 部署文档
-- [Docker 部署](DOCKER_DEPLOYMENT.md) - Docker 容器化部署指南
-- [生产部署](PRODUCTION_DEPLOYMENT_GUIDE.md) - 生产环境部署指南
-- [配置指南](CONFIGURATION_GUIDE.md) - 配置文件详细说明
-- [数据库维护](DATABASE_MAINTENANCE.md) - 数据库备份和维护
+### 📖 开发文档
+- [开发指南](docs/DEVELOPMENT_GUIDE.md)
+- [架构设计](docs/ARCHITECTURE.md)
+- [数据库设计](docs/DATABASE_DESIGN.md)
+- [代码规范](docs/CODE_STANDARDS.md)
+- [常见问题](docs/FAQ.md)
 
-### 运维文档
-- [监控指南](MONITORING_GUIDE.md) - 监控和告警配置
-- [性能优化](PERFORMANCE_QUICK_REFERENCE.md) - 性能优化建议
-- [安全检查](SECURITY_CHECKLIST.md) - 安全加固清单
-- [CI/CD 指南](CICD_GUIDE.md) - 持续集成和部署
+### 🚀 部署文档
+- [Docker 部署](DOCKER_COMPOSE_部署指南.md)
+- [生产部署](PRODUCTION_DEPLOYMENT_GUIDE.md)
+- [配置指南](CONFIGURATION_GUIDE.md)
+- [数据库维护](DATABASE_MAINTENANCE.md)
 
-### API 文档
-- Swagger 文档: http://localhost:5000/api/docs
-- API 设计规范: 详见 `docs/API_DESIGN.md`（待创建）
+</td>
+<td width="50%">
+
+### 🔧 运维文档
+- [监控指南](MONITORING_GUIDE.md)
+- [安全检查](SECURITY_CHECKLIST.md)
+- [CI/CD 指南](CICD_GUIDE.md)
+- [系统维护手册](SYSTEM_MAINTENANCE_MANUAL.md)
+
+### 📡 API 文档
+- [API 文档](docs/API_DOCUMENTATION.md)
+- [API 错误码](docs/API_ERROR_CODES.md)
+- [Swagger 文档](http://localhost:5000/api/docs)
+
+</td>
+</tr>
+</table>
 
 ## 📦 功能模块
 
-### 已实现功能
+<details open>
+<summary><b>✅ 已实现功能</b></summary>
 
-#### 基础功能
+### 🔐 基础功能
 - ✅ 用户认证和授权 (JWT + RSA 加密)
 - ✅ 多租户数据隔离
 - ✅ 用户和角色管理
@@ -343,22 +384,26 @@ celery -A celery_worker.celery beat --loglevel=info
 - ✅ 操作日志审计
 - ✅ DiceBear 头像系统
 
-#### 主机运维
+### 🖥️ 主机运维
 - ✅ SSH 主机管理 (密码/密钥认证)
 - ✅ WebShell 终端 (基于 xterm.js)
 - ✅ 主机信息收集 (CPU、内存、磁盘)
 - ✅ Ansible Playbook 管理和执行
 - ✅ 实时执行日志查看
+- ✅ 主机分组管理
+- ✅ 批量操作支持
 
-#### 监控告警
+### 📊 监控告警
 - ✅ 主机性能监控
 - ✅ 告警规则配置
 - ✅ 邮件告警通知
 - ✅ 钉钉机器人告警
 - ✅ 告警历史查询
 - ✅ 监控大屏展示
+- ✅ Grafana 集成
+- ✅ 数据源管理
 
-#### 网络探测
+### 🌐 网络探测
 - ✅ HTTP/HTTPS 探测
 - ✅ WebSocket 探测
 - ✅ TCP/UDP 探测
@@ -368,54 +413,90 @@ celery -A celery_worker.celery beat --loglevel=info
 - ✅ 探测结果缓存 (Redis)
 - ✅ 探测告警配置
 
-### 测试覆盖
+### 💾 数据库管理
+- ✅ PostgreSQL 管理
+- ✅ MySQL 管理
+- ✅ Redis 管理
+- ✅ SQL 查询编辑器
+- ✅ 数据库备份恢复
+
+### 🧪 测试覆盖
 - ✅ 前端单元测试 (80%+ 覆盖率)
 - ✅ 后端单元测试 (85%+ 覆盖率)
 - ✅ E2E 测试 (7 个测试套件)
 - ✅ 性能测试和优化
 - ✅ 安全测试和加固
 
+</details>
+
 ## 🚀 部署
 
-### Docker 部署（推荐）
+### 🐳 Docker 部署（推荐）
 
 ```bash
-# 构建镜像
+# 1. 构建镜像
 docker-compose build
 
-# 启动服务
+# 2. 启动服务
 docker-compose up -d
 
-# 查看日志
+# 3. 查看服务状态
+docker-compose ps
+
+# 4. 查看日志
 docker-compose logs -f
 
-# 停止服务
+# 5. 停止服务
 docker-compose down
 ```
 
-### 生产环境部署
+**常用命令**:
+```bash
+# 重启服务
+docker-compose restart
 
-1. **配置环境**:
-   - 修改配置文件中的密钥和密码
-   - 配置 HTTPS 证书
-   - 设置防火墙规则
+# 进入容器
+docker-compose exec backend bash
 
-2. **数据库准备**:
-   - 创建生产数据库
-   - 执行数据库迁移
-   - 配置数据库备份
+# 查看资源使用
+docker stats
 
-3. **启动服务**:
-   - 使用 Gunicorn 运行后端
-   - 使用 Nginx 反向代理
-   - 配置进程管理器（Supervisor/Systemd）
+# 清理资源
+docker system prune -a
+```
 
-4. **监控和日志**:
-   - 配置日志轮转
-   - 设置监控告警
-   - 配置性能监控
+### 🏭 生产环境部署
 
-详见 [生产部署指南](PRODUCTION_DEPLOYMENT_GUIDE.md)。
+<details>
+<summary>点击展开详细步骤</summary>
+
+#### 1️⃣ 配置环境
+- ✅ 修改配置文件中的密钥和密码
+- ✅ 配置 HTTPS 证书
+- ✅ 设置防火墙规则
+- ✅ 配置域名解析
+
+#### 2️⃣ 数据库准备
+- ✅ 创建生产数据库
+- ✅ 执行数据库迁移
+- ✅ 配置数据库备份
+- ✅ 优化数据库性能
+
+#### 3️⃣ 启动服务
+- ✅ 使用 Gunicorn 运行后端
+- ✅ 使用 Nginx 反向代理
+- ✅ 配置进程管理器（Supervisor/Systemd）
+- ✅ 配置负载均衡
+
+#### 4️⃣ 监控和日志
+- ✅ 配置日志轮转
+- ✅ 设置监控告警
+- ✅ 配置性能监控
+- ✅ 集成 APM 工具
+
+</details>
+
+📖 **详细文档**: [生产部署指南](PRODUCTION_DEPLOYMENT_GUIDE.md) | [Docker 部署指南](DOCKER_COMPOSE_部署指南.md)
 
 ## 🔒 安全
 
@@ -459,7 +540,6 @@ docker-compose down
 - 前端首屏加载: < 2s
 - API 响应时间: < 200ms
 - 数据库查询: < 100ms
-- 并发用户: 1000+
 
 详见 [性能优化指南](PERFORMANCE_QUICK_REFERENCE.md)。
 
@@ -506,7 +586,7 @@ docker-compose down
 
 ## 📞 联系我们
 
-- **Email**: support@example.com
+- **Email**: wangyufeng@yunlizhihui.com
 - **Issue**: [GitHub Issues](https://github.com/your-repo/issues)
 - **文档**: [在线文档](https://docs.example.com)
 
@@ -534,5 +614,23 @@ docker-compose down
 
 ---
 
-**Made with ❤️ by MiTong Team**#   M i T o n g D e v o p s  
- 
+**Made with  by MiTong Team**
+
+
+---
+
+<div align="center">
+
+## 📞 联系我们
+
+| 联系方式 | 链接 |
+|---------|------|
+| 📧 Email | support@mitong.com |
+| 🐛 Issues | [GitHub Issues](https://github.com/wangyufeng1995/MiTongDevopsBackend/issues) |
+| 📖 文档 | [项目文档](https://github.com/wangyufeng1995/MiTongDevopsBackend) |
+
+**Made with ❤️ by MiTong Team**
+
+[⬆ 回到顶部](#-mitong-运维管理平台)
+
+</div>
