@@ -1,0 +1,213 @@
+groups:
+  - name: authentication_alerts
+    interval: 30s
+    rules:
+      # 认证失败率告警
+      - alert: HighAuthenticationFailureRate
+        expr: auth_login_success_rate < 90
+        for: 5m
+        labels:
+          severity: warning
+          component: authentication
+        annotations:
+          summary: "High authentication failure rate detected"
+          description: "Authentication success rate is {{ $value }}% (threshold: 90%). This may indicate credential attacks or system issues."
+          
+      - alert: CriticalAuthenticationFailureRate
+        expr: auth_login_success_rate < 80
+        for: 2m
+        labels:
+          severity: critical
+          component: authentication
+        annotations:
+          summary: "Critical authentication failure rate detected"
+          description: "Authentication success rate is {{ $value }}% (threshold: 80%). Immediate investigation required."
+      
+      # Token 刷新失败率告警
+      - alert: HighTokenRefreshFailureRate
+        expr: auth_token_refresh_success_rate < 90
+        for: 5m
+        labels:
+          severity: warning
+          component: authentication
+        annotations:
+          summary: "High token refresh failure rate detected"
+          description: "Token refresh success rate is {{ $value }}% (threshold: 90%). Users may experience session interruptions."
+      
+      # 认证验证失败率告警
+      - alert: HighAuthVerificationFailureRate
+        expr: auth_verification_success_rate < 95
+        for: 5m
+        labels:
+          severity: warning
+          component: authentication
+        annotations:
+          summary: "High auth verification failure rate detected"
+          description: "Auth verification success rate is {{ $value }}% (threshold: 95%). This may indicate session or token issues."
+      
+      # 活跃 Session 数量告警
+      - alert: HighActiveSessionCount
+        expr: auth_active_sessions_count > 100000
+        for: 5m
+        labels:
+          severity: warning
+          component: authentication
+        annotations:
+          summary: "High number of active sessions"
+          description: "Active session count is {{ $value }} (threshold: 100,000). Consider scaling Redis or implementing session cleanup."
+      
+      - alert: VeryHighActiveSessionCount
+        expr: auth_active_sessions_count > 500000
+        for: 2m
+        labels:
+          severity: critical
+          component: authentication
+        annotations:
+          summary: "Very high number of active sessions"
+          description: "Active session count is {{ $value }} (threshold: 500,000). System may be under attack or experiencing issues."
+      
+      # 异常认证行为告警 - 用户不匹配
+      - alert: UserMismatchDetected
+        expr: rate(auth_verification_failed_by_reason{reason="user_mismatch"}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          component: authentication
+          security: true
+        annotations:
+          summary: "User mismatch detected in authentication"
+          description: "User mismatch rate is {{ $value }} per second. This may indicate a security breach or token theft."
+      
+      # 异常认证行为告警 - 黑名单 Token 使用
+      - alert: BlacklistedTokenUsage
+        expr: rate(auth_token_refresh_failed_by_reason{reason="token_blacklisted"}[5m]) > 0.5
+        for: 2m
+        labels:
+          severity: warning
+          component: authentication
+          security: true
+        annotations:
+          summary: "Blacklisted token usage detected"
+          description: "Blacklisted token usage rate is {{ $value }} per second. Users may be attempting to use revoked tokens."
+      
+      # 异常认证行为告警 - 大量无效密码尝试
+      - alert: HighInvalidPasswordAttempts
+        expr: rate(auth_login_failed_by_reason{reason="invalid_password"}[5m]) > 1
+        for: 5m
+        labels:
+          severity: warning
+          component: authentication
+          security: true
+        annotations:
+          summary: "High rate of invalid password attempts"
+          description: "Invalid password attempt rate is {{ $value }} per second. This may indicate a brute force attack."
+      
+      - alert: CriticalInvalidPasswordAttempts
+        expr: rate(auth_login_failed_by_reason{reason="invalid_password"}[5m]) > 5
+        for: 2m
+        labels:
+          severity: critical
+          component: authentication
+          security: true
+        annotations:
+          summary: "Critical rate of invalid password attempts"
+          description: "Invalid password attempt rate is {{ $value }} per second. Likely brute force attack in progress."
+      
+      # Redis 性能告警
+      - alert: RedisHighResponseTime
+        expr: redis_response_time_ping_ms > 200
+        for: 5m
+        labels:
+          severity: warning
+          component: redis
+        annotations:
+          summary: "Redis high response time"
+          description: "Redis PING response time is {{ $value }}ms (threshold: 200ms). Performance degradation detected."
+      
+      - alert: RedisCriticalResponseTime
+        expr: redis_response_time_ping_ms > 500
+        for: 2m
+        labels:
+          severity: critical
+          component: redis
+        annotations:
+          summary: "Redis critical response time"
+          description: "Redis PING response time is {{ $value }}ms (threshold: 500ms). Severe performance issues."
+      
+      # Redis 连接数告警
+      - alert: RedisHighConnectionCount
+        expr: redis_connected_clients > 1000
+        for: 5m
+        labels:
+          severity: warning
+          component: redis
+        annotations:
+          summary: "High number of Redis connections"
+          description: "Redis has {{ $value }} connected clients (threshold: 1000). Consider connection pooling optimization."
+      
+      - alert: RedisConnectionPoolExhausted
+        expr: redis_pool_available_connections == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: redis
+        annotations:
+          summary: "Redis connection pool exhausted"
+          description: "No available connections in Redis pool. Application may be unable to access Redis."
+      
+      # Redis 内存告警
+      - alert: RedisHighMemoryUsage
+        expr: (redis_used_memory_bytes / redis_maxmemory) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: redis
+        annotations:
+          summary: "Redis high memory usage"
+          description: "Redis memory usage is {{ $value | humanizePercentage }} (threshold: 80%). Consider increasing memory or implementing eviction policies."
+      
+      - alert: RedisCriticalMemoryUsage
+        expr: (redis_used_memory_bytes / redis_maxmemory) > 0.95
+        for: 2m
+        labels:
+          severity: critical
+          component: redis
+        annotations:
+          summary: "Redis critical memory usage"
+          description: "Redis memory usage is {{ $value | humanizePercentage }} (threshold: 95%). Immediate action required."
+      
+      # Redis 缓存命中率告警
+      - alert: RedisLowCacheHitRate
+        expr: redis_cache_hit_rate < 80
+        for: 10m
+        labels:
+          severity: warning
+          component: redis
+        annotations:
+          summary: "Low Redis cache hit rate"
+          description: "Redis cache hit rate is {{ $value }}% (threshold: 80%). Cache effectiveness is degraded."
+      
+      # Redis 服务不可用告警
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: redis
+        annotations:
+          summary: "Redis is down"
+          description: "Redis server is not responding. Authentication system will be unavailable."
+      
+      # 认证系统整体健康告警
+      - alert: AuthenticationSystemDegraded
+        expr: |
+          (auth_login_success_rate < 95) or
+          (redis_response_time_ping_ms > 200) or
+          (redis_pool_available_connections < 5)
+        for: 5m
+        labels:
+          severity: warning
+          component: authentication
+        annotations:
+          summary: "Authentication system performance degraded"
+          description: "One or more authentication system components are experiencing performance issues."

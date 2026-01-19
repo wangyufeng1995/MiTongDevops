@@ -1,0 +1,303 @@
+# 生产环境安全配置
+security:
+  # API 请求频率限制
+  rate_limiting:
+    enabled: true
+    default_limit: 100  # 默认每分钟100次请求
+    default_window: 60  # 默认时间窗口60秒
+    
+    # 按端点配置频率限制
+    endpoints:
+      # 认证相关端点 - 更严格的限制
+      'auth.login':
+        limit: 5
+        window: 60  # 每分钟最多5次登录尝试
+      'auth.refresh':
+        limit: 10
+        window: 60
+      'auth.logout':
+        limit: 10
+        window: 60
+      
+      # 用户管理端点
+      'users.create_user':
+        limit: 10
+        window: 60
+      'users.update_user':
+        limit: 20
+        window: 60
+      'users.delete_user':
+        limit: 10
+        window: 60
+      
+      # 主机管理端点
+      'hosts.create_host':
+        limit: 20
+        window: 60
+      'hosts.connect_host':
+        limit: 30
+        window: 60
+      
+      # Ansible 执行端点 - 限制执行频率
+      'ansible.execute_playbook':
+        limit: 10
+        window: 300  # 5分钟内最多10次执行
+      
+      # 监控告警端点
+      'monitor.create_channel':
+        limit: 10
+        window: 60
+      'monitor.test_channel':
+        limit: 5
+        window: 60  # 测试告警渠道限制更严格
+      
+      # 网络探测端点
+      'network.create_probe':
+        limit: 20
+        window: 60
+      'network.execute_probe':
+        limit: 50
+        window: 60
+    
+    # IP 黑名单
+    ip_blacklist: []
+    
+    # IP 白名单（不受频率限制）
+    ip_whitelist:
+      - "127.0.0.1"
+      - "::1"
+  
+  # 安全审计日志
+  audit_logging:
+    enabled: true
+    
+    # 需要记录的操作类型
+    log_operations:
+      - "login"
+      - "logout"
+      - "login_failed"
+      - "user_create"
+      - "user_update"
+      - "user_delete"
+      - "role_create"
+      - "role_update"
+      - "role_delete"
+      - "permission_change"
+      - "host_create"
+      - "host_update"
+      - "host_delete"
+      - "host_connect"
+      - "playbook_execute"
+      - "alert_create"
+      - "alert_update"
+      - "config_change"
+    
+    # 日志存储配置
+    storage:
+      type: "database"  # database, file, or both
+      retention_days: 90  # 保留90天
+      
+    # 日志文件配置（当 type 包含 file 时）
+    file:
+      path: "logs/audit.log"
+      max_size: 104857600  # 100MB
+      backup_count: 10
+      
+    # 敏感信息脱敏
+    mask_sensitive_data: true
+    sensitive_fields:
+      - "password"
+      - "private_key"
+      - "secret_key"
+      - "token"
+      - "api_key"
+  
+  # HTTPS/SSL 配置
+  ssl:
+    enabled: true
+    cert_file: "/etc/ssl/certs/server.crt"
+    key_file: "/etc/ssl/private/server.key"
+    ca_file: "/etc/ssl/certs/ca.crt"  # 可选
+    
+    # SSL 协议版本
+    protocols:
+      - "TLSv1.2"
+      - "TLSv1.3"
+    
+    # 加密套件
+    ciphers: "HIGH:!aNULL:!MD5:!3DES"
+    
+    # HSTS 配置
+    hsts:
+      enabled: true
+      max_age: 31536000  # 1年
+      include_subdomains: true
+      preload: false
+  
+  # 安全响应头
+  security_headers:
+    enabled: true
+    headers:
+      X-Frame-Options: "SAMEORIGIN"
+      X-Content-Type-Options: "nosniff"
+      X-XSS-Protection: "1; mode=block"
+      Referrer-Policy: "no-referrer-when-downgrade"
+      Content-Security-Policy: "default-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
+      Permissions-Policy: "geolocation=(), microphone=(), camera=()"
+  
+  # 会话安全
+  session:
+    secure: true  # 仅通过 HTTPS 传输
+    httponly: true  # 防止 JavaScript 访问
+    samesite: "Lax"  # CSRF 保护
+    max_age: 3600  # 1小时
+  
+  # CORS 配置
+  cors:
+    enabled: true
+    origins:
+      - "https://your-domain.com"
+      - "https://admin.your-domain.com"
+    methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+      - "OPTIONS"
+    allow_headers:
+      - "Content-Type"
+      - "Authorization"
+      - "X-CSRFToken"
+      - "X-Requested-With"
+    expose_headers:
+      - "X-RateLimit-Limit"
+      - "X-RateLimit-Remaining"
+      - "X-RateLimit-Reset"
+    max_age: 3600
+    credentials: true
+  
+  # 密码策略
+  password_policy:
+    min_length: 8
+    require_uppercase: true
+    require_lowercase: true
+    require_digits: true
+    require_special_chars: true
+    special_chars: "!@#$%^&*()_+-=[]{}|;:,.<>?"
+    max_age_days: 90  # 密码最长使用90天
+    history_count: 5  # 不能重复使用最近5个密码
+    
+  # 登录安全
+  login_security:
+    max_attempts: 5  # 最多失败5次
+    lockout_duration: 900  # 锁定15分钟
+    lockout_type: "ip_and_user"  # ip, user, or ip_and_user
+    captcha_after_attempts: 3  # 3次失败后需要验证码
+    
+  # 文件上传安全
+  file_upload:
+    max_size: 16777216  # 16MB
+    allowed_extensions:
+      - "txt"
+      - "pdf"
+      - "png"
+      - "jpg"
+      - "jpeg"
+      - "gif"
+      - "yaml"
+      - "yml"
+      - "json"
+    scan_for_malware: true  # 启用恶意软件扫描
+    quarantine_suspicious: true
+    
+  # 数据库安全
+  database:
+    ssl_mode: "require"  # disable, allow, prefer, require, verify-ca, verify-full
+    connection_timeout: 10
+    statement_timeout: 30000  # 30秒
+    idle_in_transaction_timeout: 60000  # 60秒
+    
+  # Redis 安全
+  redis:
+    require_password: true
+    ssl_enabled: false  # 内网通信可以不启用
+    max_connections: 50
+    
+  # 监控和告警
+  monitoring:
+    enabled: true
+    
+    # 健康检查
+    health_check:
+      enabled: true
+      interval: 30  # 每30秒检查一次
+      timeout: 5
+      endpoints:
+        - "/health"
+        - "/ready"
+        - "/live"
+    
+    # 性能监控
+    performance:
+      enabled: true
+      slow_request_threshold: 1000  # 慢请求阈值（毫秒）
+      log_slow_requests: true
+      
+    # 错误监控
+    error_tracking:
+      enabled: true
+      sample_rate: 1.0  # 100% 采样
+      
+    # 指标收集
+    metrics:
+      enabled: true
+      endpoint: "/metrics"
+      include_default_metrics: true
+      
+  # 告警配置
+  alerting:
+    enabled: true
+    
+    # 告警规则
+    rules:
+      # 高错误率告警
+      - name: "high_error_rate"
+        condition: "error_rate > 0.05"
+        duration: 300  # 持续5分钟
+        severity: "critical"
+        channels: ["email", "dingtalk"]
+        
+      # 高内存使用告警
+      - name: "high_memory_usage"
+        condition: "memory_usage > 0.9"
+        duration: 300
+        severity: "warning"
+        channels: ["email"]
+        
+      # 数据库连接失败告警
+      - name: "database_connection_failed"
+        condition: "database_status == 'unhealthy'"
+        duration: 60
+        severity: "critical"
+        channels: ["email", "dingtalk"]
+        
+      # Redis 连接失败告警
+      - name: "redis_connection_failed"
+        condition: "redis_status == 'unhealthy'"
+        duration: 60
+        severity: "warning"
+        channels: ["email"]
+        
+      # 频繁登录失败告警
+      - name: "frequent_login_failures"
+        condition: "login_failures > 10"
+        duration: 60
+        severity: "warning"
+        channels: ["email"]
+        
+      # API 响应时间过长告警
+      - name: "slow_api_response"
+        condition: "avg_response_time > 2000"
+        duration: 300
+        severity: "warning"
+        channels: ["email"]

@@ -1,0 +1,36 @@
+# 生产环境数据库配置模板
+# 使用前请复制为 database.yaml 并修改相应的值
+
+database:
+  postgresql:
+    # 数据库主机地址（生产环境建议使用内网地址）
+    host: "${DB_HOST:-172.30.3.135}"
+    port: ${DB_PORT:-5432}
+    database: "${DB_NAME:-mitong_devops}"
+    username: "${DB_USER:-postgres}"
+    password: "${DB_PASSWORD:-CHANGE_THIS_PASSWORD}"
+    
+    # 连接池配置（生产环境优化）
+    pool_size: 20                    # 连接池大小
+    max_overflow: 40                 # 最大溢出连接数
+    pool_timeout: 60                 # 连接超时时间（秒）
+    pool_recycle: 3600               # 连接回收时间（秒）
+    pool_pre_ping: true              # 连接前检查
+    echo: false                      # 不打印 SQL 语句
+    
+    # 连接参数
+    connect_args:
+      connect_timeout: 10
+      application_name: "admin_system_prod"
+      options: "-c statement_timeout=30000"  # SQL 语句超时 30 秒
+  
+  # 只读副本配置（可选）
+  postgresql_replica:
+    enabled: false
+    host: "${DB_REPLICA_HOST:-172.30.3.136}"
+    port: ${DB_REPLICA_PORT:-5432}
+    database: "${DB_NAME:-mitong_devops}"
+    username: "${DB_USER:-postgres}"
+    password: "${DB_PASSWORD:-CHANGE_THIS_PASSWORD}"
+    pool_size: 10
+    max_overflow: 20

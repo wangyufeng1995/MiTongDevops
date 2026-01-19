@@ -1,0 +1,133 @@
+# 生产环境应用配置模板
+# 使用前请复制为 app.yaml 并修改相应的值
+
+app:
+  name: "Admin System Template"
+  version: "1.0.0"
+  debug: false                         # 生产环境必须为 false
+  testing: false
+  secret_key: "${SECRET_KEY:-CHANGE_THIS_SECRET_KEY_IN_PRODUCTION}"
+  
+  # JWT 配置
+  jwt:
+    secret_key: "${JWT_SECRET_KEY:-CHANGE_THIS_JWT_SECRET_KEY}"
+    access_token_expires: 3600         # 1小时
+    refresh_token_expires: 2592000     # 30天
+    algorithm: "HS256"
+    token_location: ["headers"]
+    header_name: "Authorization"
+    header_type: "Bearer"
+  
+  # 服务器配置
+  server:
+    host: "0.0.0.0"
+    port: ${PORT:-5000}
+    threaded: true
+    processes: 1                       # Gunicorn 会管理进程
+    
+  # CORS 配置
+  cors:
+    enabled: true
+    origins:
+      - "https://your-domain.com"      # 生产环境域名
+      - "https://www.your-domain.com"
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    allow_headers: ["Content-Type", "Authorization", "X-CSRF-Token"]
+    expose_headers: ["X-CSRF-Token"]
+    supports_credentials: true
+    max_age: 3600
+  
+  # 文件上传配置
+  upload:
+    max_content_length: 16777216       # 16MB
+    allowed_extensions: ["txt", "pdf", "png", "jpg", "jpeg", "gif", "yaml", "yml"]
+    upload_folder: "/app/uploads"
+    
+  # 安全配置
+  security:
+    password_hash_rounds: 12           # bcrypt 加密轮数
+    max_login_attempts: 5              # 最大登录尝试次数
+    lockout_duration: 900              # 锁定时间（15分钟）
+    password_min_length: 8
+    password_require_special_chars: true
+    password_require_numbers: true
+    password_require_uppercase: true
+    session_cookie_secure: true        # 仅 HTTPS
+    session_cookie_httponly: true
+    session_cookie_samesite: "Lax"
+    
+  # 密码加密配置
+  password_encryption:
+    rsa_key_size: 2048
+    private_key_path: "keys/private_key.pem"
+    public_key_cache_ttl: 3600
+    
+  # CSRF 保护配置
+  csrf:
+    enabled: true
+    token_expires: 3600                # CSRF token 过期时间
+    exempt_endpoints:                  # 免除 CSRF 验证的端点
+      - "/api/auth/login"
+      - "/api/auth/public-key"
+      - "/api/health"
+      - "/api/ready"
+      - "/api/live"
+    
+  # 速率限制配置
+  rate_limit:
+    enabled: true
+    default_limits:
+      - "200 per hour"
+      - "50 per minute"
+    login_limits:
+      - "10 per hour"
+      - "3 per minute"
+    api_limits:
+      - "1000 per hour"
+      - "100 per minute"
+    storage_url: "redis://${REDIS_HOST:-172.30.3.135}:${REDIS_PORT:-6379}/3"
+    
+  # Celery 配置
+  celery:
+    broker_url: "redis://${REDIS_HOST:-172.30.3.135}:${REDIS_PORT:-6379}/2"
+    result_backend: "redis://${REDIS_HOST:-172.30.3.135}:${REDIS_PORT:-6379}/2"
+    task_serializer: "json"
+    result_serializer: "json"
+    accept_content: ["json"]
+    timezone: "Asia/Shanghai"
+    enable_utc: true
+    task_track_started: true
+    task_time_limit: 3600              # 任务最大执行时间（1小时）
+    task_soft_time_limit: 3000         # 任务软超时（50分钟）
+    worker_prefetch_multiplier: 4
+    worker_max_tasks_per_child: 1000   # Worker 处理任务数后重启
+    
+  # 监控配置
+  monitoring:
+    enabled: true
+    sentry_dsn: "${SENTRY_DSN:-}"      # Sentry 错误追踪
+    prometheus_enabled: true
+    metrics_port: 9090
+    
+  # 邮件配置
+  mail:
+    server: "${MAIL_SERVER:-smtp.gmail.com}"
+    port: ${MAIL_PORT:-587}
+    use_tls: true
+    use_ssl: false
+    username: "${MAIL_USERNAME:-}"
+    password: "${MAIL_PASSWORD:-}"
+    default_sender: "${MAIL_DEFAULT_SENDER:-noreply@example.com}"
+    max_emails: 100                    # 每小时最大发送数
+    
+  # 日志配置
+  logging:
+    level: "INFO"                      # 生产环境使用 INFO
+    format: "json"                     # JSON 格式便于日志分析
+    handlers:
+      - "file"
+      - "syslog"
+    file_path: "/app/logs/app.log"
+    max_bytes: 10485760                # 10MB
+    backup_count: 10
+    syslog_address: "${SYSLOG_ADDRESS:-/dev/log}"

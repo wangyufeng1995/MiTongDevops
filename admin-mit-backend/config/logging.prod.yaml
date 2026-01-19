@@ -1,0 +1,165 @@
+# 生产环境日志配置模板
+# 使用前请复制为 logging.yaml 并修改相应的值
+
+version: 1
+disable_existing_loggers: false
+
+formatters:
+  # 简单格式（控制台）
+  simple:
+    format: '[%(asctime)s] %(levelname)s: %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+  
+  # 详细格式（文件）
+  detailed:
+    format: '[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] [%(process)d:%(thread)d] %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+  
+  # JSON 格式（生产环境推荐）
+  json:
+    class: pythonjsonlogger.jsonlogger.JsonFormatter
+    format: '%(asctime)s %(name)s %(levelname)s %(funcName)s %(lineno)d %(message)s'
+
+filters:
+  # 速率限制过滤器（防止日志洪水）
+  rate_limit:
+    (): app.core.logging_filters.RateLimitFilter
+    rate: 100
+    per: 60
+    burst: 10
+
+handlers:
+  # 控制台输出
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: simple
+    stream: ext://sys.stdout
+  
+  # 应用日志文件
+  app_file:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: json
+    filename: /app/logs/app.log
+    maxBytes: 10485760                 # 10MB
+    backupCount: 10
+    encoding: utf8
+    filters: [rate_limit]
+  
+  # 错误日志文件
+  error_file:
+    class: logging.handlers.RotatingFileHandler
+    level: ERROR
+    formatter: detailed
+    filename: /app/logs/error.log
+    maxBytes: 10485760                 # 10MB
+    backupCount: 10
+    encoding: utf8
+  
+  # 访问日志文件
+  access_file:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: json
+    filename: /app/logs/access.log
+    maxBytes: 10485760                 # 10MB
+    backupCount: 10
+    encoding: utf8
+  
+  # 安全日志文件
+  security_file:
+    class: logging.handlers.RotatingFileHandler
+    level: WARNING
+    formatter: detailed
+    filename: /app/logs/security.log
+    maxBytes: 10485760                 # 10MB
+    backupCount: 20                    # 保留更多安全日志
+    encoding: utf8
+  
+  # Syslog（可选）
+  syslog:
+    class: logging.handlers.SysLogHandler
+    level: WARNING
+    formatter: detailed
+    address: /dev/log
+    facility: local0
+  
+  # 邮件告警（严重错误）
+  email:
+    class: logging.handlers.SMTPHandler
+    level: CRITICAL
+    formatter: detailed
+    mailhost: ${MAIL_SERVER:-smtp.gmail.com}
+    fromaddr: ${MAIL_FROM:-alerts@example.com}
+    toaddrs:
+      - ${ALERT_EMAIL:-admin@example.com}
+    subject: '[CRITICAL] Admin System Error'
+    credentials:
+      - ${MAIL_USERNAME:-}
+      - ${MAIL_PASSWORD:-}
+    secure: []
+
+loggers:
+  # 应用日志
+  app:
+    level: INFO
+    handlers: [console, app_file, error_file]
+    propagate: false
+  
+  # 访问日志
+  app.access:
+    level: INFO
+    handlers: [access_file]
+    propagate: false
+  
+  # 安全日志
+  app.security:
+    level: WARNING
+    handlers: [security_file, email]
+    propagate: false
+  
+  # SQLAlchemy 日志
+  sqlalchemy:
+    level: WARNING
+    handlers: [app_file]
+    propagate: false
+  
+  # SQLAlchemy 引擎日志（SQL 语句）
+  sqlalchemy.engine:
+    level: WARNING                     # 生产环境不记录 SQL
+    handlers: [app_file]
+    propagate: false
+  
+  # Celery 日志
+  celery:
+    level: INFO
+    handlers: [console, app_file]
+    propagate: false
+  
+  # Flask 日志
+  flask:
+    level: INFO
+    handlers: [console, app_file]
+    propagate: false
+  
+  # Werkzeug 日志
+  werkzeug:
+    level: WARNING
+    handlers: [access_file]
+    propagate: false
+  
+  # Gunicorn 日志
+  gunicorn.error:
+    level: INFO
+    handlers: [console, error_file]
+    propagate: false
+  
+  gunicorn.access:
+    level: INFO
+    handlers: [access_file]
+    propagate: false
+
+root:
+  level: INFO
+  handlers: [console, app_file, error_file]

@@ -1,0 +1,58 @@
+# 生产环境 Redis 配置模板
+# 使用前请复制为 redis.yaml 并修改相应的值
+
+redis:
+  # 主 Redis 配置
+  host: "${REDIS_HOST:-172.30.3.135}"
+  port: ${REDIS_PORT:-6379}
+  password: "${REDIS_PASSWORD:-}"      # 生产环境强烈建议设置密码
+  db: 0
+  decode_responses: true
+  socket_timeout: 5
+  socket_connect_timeout: 5
+  retry_on_timeout: true
+  health_check_interval: 30
+  
+  # 连接池配置（生产环境优化）
+  connection_pool:
+    max_connections: 100               # 最大连接数
+    retry_on_timeout: true
+    socket_keepalive: true
+    socket_keepalive_options:
+      TCP_KEEPIDLE: 60
+      TCP_KEEPINTVL: 10
+      TCP_KEEPCNT: 3
+  
+  # 缓存配置
+  cache:
+    default_timeout: 300               # 默认缓存时间（秒）
+    network_probe_ttl: 180             # 网络探测结果缓存时间
+    session_ttl: 3600                  # 会话缓存时间
+    user_cache_ttl: 600                # 用户信息缓存时间
+    menu_cache_ttl: 1800               # 菜单缓存时间
+    
+  # Sentinel 配置（高可用，可选）
+  sentinel:
+    enabled: false
+    sentinels:
+      - host: "${REDIS_SENTINEL_1:-172.30.3.137}"
+        port: 26379
+      - host: "${REDIS_SENTINEL_2:-172.30.3.138}"
+        port: 26379
+      - host: "${REDIS_SENTINEL_3:-172.30.3.139}"
+        port: 26379
+    master_name: "mymaster"
+    socket_timeout: 5
+    
+  # Cluster 配置（集群模式，可选）
+  cluster:
+    enabled: false
+    startup_nodes:
+      - host: "${REDIS_CLUSTER_1:-172.30.3.140}"
+        port: 7000
+      - host: "${REDIS_CLUSTER_2:-172.30.3.141}"
+        port: 7001
+      - host: "${REDIS_CLUSTER_3:-172.30.3.142}"
+        port: 7002
+    max_connections: 100
+    skip_full_coverage_check: false

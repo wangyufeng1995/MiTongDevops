@@ -1,0 +1,93 @@
+# 应用告警规则
+
+groups:
+  - name: application_alerts
+    interval: 30s
+    rules:
+      # 应用服务宕机
+      - alert: ServiceDown
+        expr: up{job=~"admin-backend|postgres|redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: application
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "{{ $labels.job }} on {{ $labels.instance }} has been down for more than 1 minute"
+
+      # 高错误率
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          category: application
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is above 5% (current value: {{ $value | humanizePercentage }})"
+
+      # API 响应时间过长
+      - alert: SlowAPIResponse
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          category: application
+        annotations:
+          summary: "Slow API response time"
+          description: "95th percentile response time is above 2s (current value: {{ $value }}s)"
+
+      # 数据库连接池耗尽
+      - alert: DatabaseConnectionPoolExhausted
+        expr: sqlalchemy_pool_connections_in_use / sqlalchemy_pool_connections_limit > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          category: database
+        annotations:
+          summary: "Database connection pool nearly exhausted"
+          description: "Connection pool usage is above 90% (current value: {{ $value | humanizePercentage }})"
+
+      # Redis 内存使用过高
+      - alert: RedisHighMemory
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          category: cache
+        annotations:
+          summary: "Redis memory usage is high"
+          description: "Redis memory usage is above 90% (current value: {{ $value | humanizePercentage }})"
+
+      # Celery 队列积压
+      - alert: CeleryQueueBacklog
+        expr: celery_queue_length > 1000
+        for: 10m
+        labels:
+          severity: warning
+          category: queue
+        annotations:
+          summary: "Celery queue has backlog"
+          description: "Celery queue {{ $labels.queue }} has {{ $value }} pending tasks"
+
+      # Celery Worker 宕机
+      - alert: CeleryWorkerDown
+        expr: celery_workers_active == 0
+        for: 2m
+        labels:
+          severity: critical
+          category: queue
+        annotations:
+          summary: "No active Celery workers"
+          description: "All Celery workers are down"
+
+      # 请求速率异常
+      - alert: AbnormalRequestRate
+        expr: abs(rate(http_requests_total[5m]) - rate(http_requests_total[5m] offset 1h)) / rate(http_requests_total[5m] offset 1h) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          category: application
+        annotations:
+          summary: "Abnormal request rate detected"
+          description: "Request rate has changed by more than 50% compared to 1 hour ago"

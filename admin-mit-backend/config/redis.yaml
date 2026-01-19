@@ -1,0 +1,28 @@
+redis:
+  host: "172.30.3.135"
+  port: 6379
+  password: "Yunli@redis5"  # Redis 密码，如果没有则留空
+  db: 2  # 默认数据库
+  decode_responses: true
+  socket_timeout: 5
+  socket_connect_timeout: 5
+  retry_on_timeout: true
+  health_check_interval: 30
+  
+  # 连接池配置
+  connection_pool:
+    max_connections: 50
+    retry_on_timeout: true
+  
+  # 缓存配置
+  cache:
+    default_timeout: 300  # 默认缓存时间（秒）
+    network_probe_ttl: 180  # 网络探测结果缓存时间
+    session_ttl: 3600  # 会话缓存时间
+  
+  # 测试 Redis 配置
+  test:
+    host: "172.30.3.135"
+    port: 6379
+    db: 1  # 使用不同的数据库进行测试
+    password: "Yunli@redis5"

@@ -1,0 +1,196 @@
+/* Terminal component styles */
+.terminal-wrapper {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+}
+
+.terminal-container {
+  position: relative;
+}
+
+.terminal-container .xterm {
+  padding: 16px;
+}
+
+.terminal-container .xterm-viewport {
+  background-color: transparent !important;
+}
+
+.terminal-container .xterm-screen {
+  background-color: transparent !important;
+}
+
+/* 优化字体渲染 */
+.terminal-container .xterm-rows {
+  font-feature-settings: "liga" 1, "calt" 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 自定义滚动条样式 */
+.terminal-container .xterm .xterm-viewport::-webkit-scrollbar {
+  width: 10px;
+}
+
+.terminal-container .xterm .xterm-viewport::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+}
+
+.terminal-container .xterm .xterm-viewport::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(100, 100, 100, 0.5), rgba(80, 80, 80, 0.5));
+  border-radius: 5px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.terminal-container .xterm .xterm-viewport::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(120, 120, 120, 0.6), rgba(100, 100, 100, 0.6));
+  background-clip: padding-box;
+}
+
+/* 工具栏样式 */
+.terminal-toolbar {
+  user-select: none;
+}
+
+.terminal-toolbar button {
+  transition: all 0.2s ease;
+}
+
+.terminal-toolbar button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 设置面板样式 */
+.terminal-wrapper .absolute {
+  backdrop-filter: blur(8px);
+}
+
+/* WebShell 终端特定样式 */
+.webshell-terminal {
+  height: 100%;
+}
+
+.webshell-terminal .terminal-wrapper {
+  height: 100%;
+  border-radius: 0;
+  background: transparent;
+}
+
+.webshell-terminal .terminal-toolbar {
+  display: none;
+}
+
+.webshell-terminal .terminal-content {
+  height: 100% !important;
+}
+
+/* SSH 终端样式 */
+.ssh-terminal-wrapper {
+  position: relative;
+  height: 100%;
+}
+
+.ssh-terminal-container {
+  height: 100%;
+}
+
+.ssh-terminal-status {
+  pointer-events: none;
+}
+
+/* 终端光标动画 */
+.terminal-container .xterm-cursor-layer {
+  animation: cursor-blink 1s step-end infinite;
+}
+
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* 终端选择样式 */
+.terminal-container .xterm-selection div {
+  background-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+/* 终端链接样式 */
+.terminal-container .xterm-link-layer a {
+  color: #60a5fa !important;
+  text-decoration: underline;
+}
+
+.terminal-container .xterm-link-layer a:hover {
+  color: #93c5fd !important;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .terminal-toolbar {
+    padding: 8px 12px;
+  }
+  
+  .terminal-toolbar span {
+    display: none;
+  }
+  
+  .terminal-content {
+    height: 300px !important;
+  }
+}
+
+/* 全屏模式 */
+.webshell-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: #111827;
+}
+
+/* 终端加载动画 */
+.terminal-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: #111827;
+}
+
+.terminal-loading::after {
+  content: '';
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(59, 130, 246, 0.3);
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 终端欢迎消息样式 */
+.terminal-welcome {
+  color: #9ca3af;
+  padding: 12px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.terminal-welcome .highlight {
+  color: #60a5fa;
+}
+
+.terminal-welcome .success {
+  color: #34d399;
+}
+
+.terminal-welcome .warning {
+  color: #fbbf24;
+}
+
+.terminal-welcome .error {
+  color: #f87171;
+}

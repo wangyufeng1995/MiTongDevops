@@ -1,0 +1,436 @@
+# 监控和告警配置
+monitoring:
+  # Prometheus 配置
+  prometheus:
+    enabled: true
+    port: 9090
+    scrape_interval: 15s
+    evaluation_interval: 15s
+    
+    # 指标导出
+    metrics:
+      enabled: true
+      endpoint: "/metrics"
+      include_default: true
+      
+      # 自定义指标
+      custom_metrics:
+        - name: "app_info"
+          type: "info"
+          description: "Application information"
+          labels:
+            version: "1.0.0"
+            environment: "production"
+        
+        - name: "http_requests_total"
+          type: "counter"
+          description: "Total HTTP requests"
+          labels:
+            - "method"
+            - "endpoint"
+            - "status"
+        
+        - name: "http_request_duration_seconds"
+          type: "histogram"
+          description: "HTTP request duration"
+          buckets: [0.1, 0.5, 1.0, 2.0, 5.0]
+        
+        - name: "database_connections"
+          type: "gauge"
+          description: "Active database connections"
+        
+        - name: "redis_operations_total"
+          type: "counter"
+          description: "Total Redis operations"
+          labels:
+            - "operation"
+            - "status"
+  
+  # Grafana 配置
+  grafana:
+    enabled: true
+    port: 3000
+    admin_user: "admin"
+    admin_password: "change-me-in-production"
+    
+    # 数据源
+    datasources:
+      - name: "Prometheus"
+        type: "prometheus"
+        url: "http://prometheus:9090"
+        access: "proxy"
+        is_default: true
+    
+    # 仪表板
+    dashboards:
+      - name: "Application Overview"
+        uid: "app-overview"
+        folder: "Admin System"
+        
+      - name: "API Performance"
+        uid: "api-performance"
+        folder: "Admin System"
+        
+      - name: "Database Metrics"
+        uid: "database-metrics"
+        folder: "Admin System"
+        
+      - name: "Security Audit"
+        uid: "security-audit"
+        folder: "Admin System"
+  
+  # 健康检查配置
+  health_check:
+    enabled: true
+    interval: 30  # 检查间隔（秒）
+    timeout: 5  # 超时时间（秒）
+    
+    # 检查端点
+    endpoints:
+      - path: "/health"
+        name: "full_health"
+        critical: true
+        
+      - path: "/ready"
+        name: "readiness"
+        critical: true
+        
+      - path: "/live"
+        name: "liveness"
+        critical: true
+    
+    # 依赖服务检查
+    dependencies:
+      - name: "database"
+        type: "postgresql"
+        critical: true
+        timeout: 5
+        
+      - name: "redis"
+        type: "redis"
+        critical: false
+        timeout: 3
+        
+      - name: "celery"
+        type: "celery"
+        critical: false
+        timeout: 5
+  
+  # 性能监控
+  performance:
+    enabled: true
+    
+    # 慢请求阈值
+    slow_request_threshold: 1000  # 毫秒
+    log_slow_requests: true
+    
+    # 慢查询阈值
+    slow_query_threshold: 500  # 毫秒
+    log_slow_queries: true
+    
+    # 采样率
+    sampling_rate: 1.0  # 100% 采样
+    
+    # 追踪配置
+    tracing:
+      enabled: false  # 可选：启用分布式追踪
+      service_name: "admin-backend"
+      jaeger_endpoint: "http://jaeger:14268/api/traces"
+  
+  # 错误监控
+  error_tracking:
+    enabled: true
+    
+    # Sentry 配置（可选）
+    sentry:
+      enabled: false
+      dsn: "https://your-sentry-dsn"
+      environment: "production"
+      traces_sample_rate: 0.1
+      
+    # 错误采样
+    sample_rate: 1.0  # 100% 采样
+    
+    # 错误分组
+    grouping:
+      by_type: true
+      by_message: true
+      by_stacktrace: false
+  
+  # 日志监控
+  logging:
+    enabled: true
+    
+    # 日志级别
+    level: "INFO"
+    
+    # 日志格式
+    format: "json"  # json or text
+    
+    # 日志输出
+    outputs:
+      - type: "file"
+        path: "logs/app.log"
+        max_size: 104857600  # 100MB
+        backup_count: 10
+        
+      - type: "file"
+        path: "logs/error.log"
+        level: "ERROR"
+        max_size: 104857600
+        backup_count: 10
+        
+      - type: "console"
+        level: "INFO"
+    
+    # 结构化日志字段
+    structured_fields:
+      - "timestamp"
+      - "level"
+      - "logger"
+      - "message"
+      - "request_id"
+      - "user_id"
+      - "tenant_id"
+      - "ip_address"
+      - "duration"
+  
+  # 告警配置
+  alerting:
+    enabled: true
+    
+    # Alertmanager 配置
+    alertmanager:
+      url: "http://alertmanager:9093"
+      
+    # 告警规则
+    rules:
+      # 应用健康告警
+      - name: "application_down"
+        expr: "up{job='admin-backend'} == 0"
+        duration: "1m"
+        severity: "critical"
+        annotations:
+          summary: "Application is down"
+          description: "Admin backend application is not responding"
+        labels:
+          team: "backend"
+          service: "admin-backend"
+      
+      # 高错误率告警
+      - name: "high_error_rate"
+        expr: "rate(http_requests_total{status=~'5..'}[5m]) > 0.05"
+        duration: "5m"
+        severity: "critical"
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is above 5% for 5 minutes"
+        labels:
+          team: "backend"
+          service: "admin-backend"
+      
+      # 高响应时间告警
+      - name: "high_response_time"
+        expr: "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2"
+        duration: "5m"
+        severity: "warning"
+        annotations:
+          summary: "High API response time"
+          description: "95th percentile response time is above 2 seconds"
+        labels:
+          team: "backend"
+          service: "admin-backend"
+      
+      # 数据库连接告警
+      - name: "database_down"
+        expr: "up{job='postgres'} == 0"
+        duration: "1m"
+        severity: "critical"
+        annotations:
+          summary: "Database is down"
+          description: "PostgreSQL database is not responding"
+        labels:
+          team: "infrastructure"
+          service: "database"
+      
+      # Redis 连接告警
+      - name: "redis_down"
+        expr: "up{job='redis'} == 0"
+        duration: "1m"
+        severity: "warning"
+        annotations:
+          summary: "Redis is down"
+          description: "Redis cache is not responding"
+        labels:
+          team: "infrastructure"
+          service: "cache"
+      
+      # 高内存使用告警
+      - name: "high_memory_usage"
+        expr: "(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes > 0.9"
+        duration: "5m"
+        severity: "warning"
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is above 90%"
+        labels:
+          team: "infrastructure"
+          service: "system"
+      
+      # 高 CPU 使用告警
+      - name: "high_cpu_usage"
+        expr: "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode='idle'}[5m])) * 100) > 80"
+        duration: "5m"
+        severity: "warning"
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is above 80%"
+        labels:
+          team: "infrastructure"
+          service: "system"
+      
+      # 磁盘空间告警
+      - name: "disk_space_low"
+        expr: "(node_filesystem_avail_bytes / node_filesystem_size_bytes) < 0.1"
+        duration: "5m"
+        severity: "warning"
+        annotations:
+          summary: "Disk space low"
+          description: "Available disk space is below 10%"
+        labels:
+          team: "infrastructure"
+          service: "system"
+      
+      # 频繁登录失败告警
+      - name: "frequent_login_failures"
+        expr: "rate(login_failures_total[5m]) > 0.1"
+        duration: "5m"
+        severity: "warning"
+        annotations:
+          summary: "Frequent login failures"
+          description: "High rate of login failures detected"
+        labels:
+          team: "security"
+          service: "auth"
+      
+      # CSRF 攻击告警
+      - name: "csrf_attacks"
+        expr: "rate(csrf_violations_total[5m]) > 0.05"
+        duration: "5m"
+        severity: "critical"
+        annotations:
+          summary: "CSRF attacks detected"
+          description: "High rate of CSRF violations"
+        labels:
+          team: "security"
+          service: "security"
+      
+      # 频率限制触发告警
+      - name: "rate_limit_exceeded"
+        expr: "rate(rate_limit_exceeded_total[5m]) > 1"
+        duration: "5m"
+        severity: "warning"
+        annotations:
+          summary: "Rate limit frequently exceeded"
+          description: "High rate of rate limit violations"
+        labels:
+          team: "security"
+          service: "api"
+    
+    # 告警通知渠道
+    notification_channels:
+      - name: "email"
+        type: "email"
+        enabled: true
+        config:
+          to: ["team@example.com"]
+          from: "alertmanager@example.com"
+          
+      - name: "dingtalk"
+        type: "webhook"
+        enabled: true
+        config:
+          url: "https://oapi.dingtalk.com/robot/send?access_token=YOUR_TOKEN"
+          
+      - name: "slack"
+        type: "webhook"
+        enabled: false
+        config:
+          url: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+    
+    # 告警路由
+    routes:
+      - match:
+          severity: "critical"
+        receiver: "critical-team"
+        group_wait: "10s"
+        group_interval: "10s"
+        repeat_interval: "1h"
+        
+      - match:
+          severity: "warning"
+        receiver: "warning-team"
+        group_wait: "30s"
+        group_interval: "5m"
+        repeat_interval: "4h"
+        
+      - match:
+          team: "security"
+        receiver: "security-team"
+        group_wait: "10s"
+        group_interval: "10s"
+        repeat_interval: "30m"
+  
+  # 审计日志监控
+  audit:
+    enabled: true
+    
+    # 监控的操作类型
+    monitored_operations:
+      - "login_failed"
+      - "permission_change"
+      - "config_change"
+      - "security_violation"
+      - "user_delete"
+      - "role_delete"
+    
+    # 异常行为检测
+    anomaly_detection:
+      enabled: true
+      
+      # 检测规则
+      rules:
+        - name: "multiple_failed_logins"
+          condition: "login_failed > 5 in 5m"
+          action: "alert"
+          
+        - name: "unusual_permission_changes"
+          condition: "permission_change > 10 in 1h"
+          action: "alert"
+          
+        - name: "bulk_user_deletion"
+          condition: "user_delete > 5 in 10m"
+          action: "alert"
+  
+  # 性能基准
+  benchmarks:
+    # API 响应时间基准
+    api_response_time:
+      p50: 100  # 毫秒
+      p95: 500
+      p99: 1000
+    
+    # 数据库查询时间基准
+    database_query_time:
+      p50: 50
+      p95: 200
+      p99: 500
+    
+    # 吞吐量基准
+    throughput:
+      requests_per_second: 1000
+      
+    # 并发连接基准
+    concurrent_connections:
+      max: 1000
+      warning_threshold: 800

@@ -1,0 +1,458 @@
+{
+  "dashboard": {
+    "title": "Authentication System Monitoring",
+    "tags": ["authentication", "security", "redis"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Authentication Success Rate",
+        "type": "graph",
+        "gridPos": {
+          "x": 0,
+          "y": 0,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "auth_login_success_rate",
+            "legendFormat": "Login Success Rate",
+            "refId": "A"
+          },
+          {
+            "expr": "auth_token_refresh_success_rate",
+            "legendFormat": "Token Refresh Success Rate",
+            "refId": "B"
+          },
+          {
+            "expr": "auth_verification_success_rate",
+            "legendFormat": "Verification Success Rate",
+            "refId": "C"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percent",
+            "min": 0,
+            "max": 100
+          }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [90],
+                "type": "lt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              },
+              "reducer": {
+                "params": [],
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ],
+          "name": "Authentication Success Rate Alert"
+        }
+      },
+      {
+        "id": 2,
+        "title": "Active Sessions Count",
+        "type": "graph",
+        "gridPos": {
+          "x": 12,
+          "y": 0,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "auth_active_sessions_count",
+            "legendFormat": "Active Sessions",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "short"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Authentication Operations Rate",
+        "type": "graph",
+        "gridPos": {
+          "x": 0,
+          "y": 8,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "rate(auth_login_success_total[5m])",
+            "legendFormat": "Login Success/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(auth_login_failed_total[5m])",
+            "legendFormat": "Login Failed/sec",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(auth_logout_total[5m])",
+            "legendFormat": "Logout/sec",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(auth_token_refresh_success_total[5m])",
+            "legendFormat": "Token Refresh/sec",
+            "refId": "D"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "ops"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Login Failure Reasons",
+        "type": "piechart",
+        "gridPos": {
+          "x": 12,
+          "y": 8,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "auth_login_failed_by_reason",
+            "legendFormat": "{{reason}}",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Redis Response Time",
+        "type": "graph",
+        "gridPos": {
+          "x": 0,
+          "y": 16,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "redis_response_time_ping_ms",
+            "legendFormat": "PING",
+            "refId": "A"
+          },
+          {
+            "expr": "redis_response_time_get_ms",
+            "legendFormat": "GET",
+            "refId": "B"
+          },
+          {
+            "expr": "redis_response_time_set_ms",
+            "legendFormat": "SET",
+            "refId": "C"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "ms",
+            "min": 0
+          }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [200],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              },
+              "reducer": {
+                "params": [],
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ],
+          "name": "Redis Response Time Alert"
+        }
+      },
+      {
+        "id": 6,
+        "title": "Redis Connection Pool",
+        "type": "graph",
+        "gridPos": {
+          "x": 12,
+          "y": 16,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "redis_pool_max_connections",
+            "legendFormat": "Max Connections",
+            "refId": "A"
+          },
+          {
+            "expr": "redis_pool_in_use_connections",
+            "legendFormat": "In Use",
+            "refId": "B"
+          },
+          {
+            "expr": "redis_pool_available_connections",
+            "legendFormat": "Available",
+            "refId": "C"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "short"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Redis Memory Usage",
+        "type": "graph",
+        "gridPos": {
+          "x": 0,
+          "y": 24,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "redis_used_memory_bytes",
+            "legendFormat": "Used Memory",
+            "refId": "A"
+          },
+          {
+            "expr": "redis_used_memory_rss_bytes",
+            "legendFormat": "RSS Memory",
+            "refId": "B"
+          },
+          {
+            "expr": "redis_used_memory_peak_bytes",
+            "legendFormat": "Peak Memory",
+            "refId": "C"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "bytes"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Redis Cache Performance",
+        "type": "graph",
+        "gridPos": {
+          "x": 12,
+          "y": 24,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "redis_cache_hit_rate",
+            "legendFormat": "Cache Hit Rate",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(redis_keyspace_hits_total[5m])",
+            "legendFormat": "Hits/sec",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(redis_keyspace_misses_total[5m])",
+            "legendFormat": "Misses/sec",
+            "refId": "C"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percent",
+            "min": 0,
+            "max": 100
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Security Events",
+        "type": "graph",
+        "gridPos": {
+          "x": 0,
+          "y": 32,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "rate(auth_verification_failed_by_reason{reason=\"user_mismatch\"}[5m])",
+            "legendFormat": "User Mismatch/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(auth_token_refresh_failed_by_reason{reason=\"token_blacklisted\"}[5m])",
+            "legendFormat": "Blacklisted Token Usage/sec",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(auth_login_failed_by_reason{reason=\"invalid_password\"}[5m])",
+            "legendFormat": "Invalid Password/sec",
+            "refId": "C"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "ops"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "System Health Overview",
+        "type": "stat",
+        "gridPos": {
+          "x": 12,
+          "y": 32,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "redis_up",
+            "legendFormat": "Redis Status",
+            "refId": "A"
+          },
+          {
+            "expr": "auth_login_success_rate",
+            "legendFormat": "Login Success Rate",
+            "refId": "B"
+          },
+          {
+            "expr": "auth_active_sessions_count",
+            "legendFormat": "Active Sessions",
+            "refId": "C"
+          },
+          {
+            "expr": "redis_response_time_ping_ms",
+            "legendFormat": "Redis Latency (ms)",
+            "refId": "D"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "textMode": "auto"
+        }
+      },
+      {
+        "id": 11,
+        "title": "Authentication Totals",
+        "type": "stat",
+        "gridPos": {
+          "x": 0,
+          "y": 40,
+          "w": 24,
+          "h": 4
+        },
+        "targets": [
+          {
+            "expr": "auth_login_success_total",
+            "legendFormat": "Total Logins",
+            "refId": "A"
+          },
+          {
+            "expr": "auth_login_failed_total",
+            "legendFormat": "Failed Logins",
+            "refId": "B"
+          },
+          {
+            "expr": "auth_logout_total",
+            "legendFormat": "Total Logouts",
+            "refId": "C"
+          },
+          {
+            "expr": "auth_token_refresh_success_total",
+            "legendFormat": "Token Refreshes",
+            "refId": "D"
+          },
+          {
+            "expr": "auth_verification_success_total",
+            "legendFormat": "Verifications",
+            "refId": "E"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "orientation": "horizontal",
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "textMode": "auto"
+        }
+      }
+    ],
+    "templating": {
+      "list": []
+    },
+    "annotations": {
+      "list": [
+        {
+          "datasource": "Prometheus",
+          "enable": true,
+          "expr": "ALERTS{alertname=~\".*Auth.*|.*Redis.*\"}",
+          "iconColor": "red",
+          "name": "Alerts",
+          "step": "60s",
+          "tagKeys": "alertname,severity",
+          "textFormat": "{{alertname}}",
+          "titleFormat": "Alert"
+        }
+      ]
+    },
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": ["10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"]
+    }
+  }
+}
